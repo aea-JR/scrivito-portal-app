@@ -52,3 +52,21 @@ async function postProcessData(data: { _id: string }) {
     salutation: await load(() => CurrentUser.get('salutation')),
   }
 }
+
+interface UserData {
+  name: string
+  givenName: string
+  familyName: string
+  salutation: string
+}
+
+export function isUserData(input: unknown): input is UserData {
+  return (
+    !!input &&
+    typeof input === 'object' &&
+    typeof (input as UserData).name === 'string' &&
+    typeof (input as UserData).givenName === 'string' &&
+    typeof (input as UserData).familyName === 'string' &&
+    typeof (input as UserData).salutation === 'string'
+  )
+}
