@@ -19,10 +19,15 @@ export const CurrentUser = provideDataItem('CurrentUser', {
       throw new Error('Neoletter data is not in the expected format')
     }
 
-    // TODO: read data from Pisa
-    const pisaUserId: string = 'F87BDC400E41D630E030A8C00D01158A'
-    const salesUserId: string = '052601BEBCEC39C8E040A8C00D0107AC'
-    const serviceUserId: string = 'D456ACF6FF405922E030A8C02A010C68'
+    const whoAmI = await unstable_JrRestApi.fetch('../pisa-api/whoami')
+
+    if (!isWhoAmI(whoAmI)) {
+      throw new Error('Whoami data is not in the expected format')
+    }
+
+    const pisaUserId = ensureString(whoAmI._id)
+    const salesUserId = ensureString(whoAmI.salesUserId) // TODO: Remove "ensureString" once datalocator filter can handle "null"
+    const serviceUserId = ensureString(whoAmI.serviceUserId) // TODO: Remove "ensureString" once datalocator filter can handle "null"
 
     return {
       email: user.email(),
@@ -94,4 +99,55 @@ function isNeoletterData(input: unknown): input is NeoletterData {
 
 function neoletterProfileUrl() {
   return `neoletter/instances/${getInstanceId()}/my/profile`
+}
+
+interface WhoAmI {
+  _id: string
+  name: string
+  salutation: string
+  givenName: string
+  familyName: string
+  email: string
+  position: string
+  staff: boolean
+  image: {
+    _id: string
+    filename: string
+    contentType: string
+    contentLength: number
+  } | null
+  salesUserId: string | null
+  serviceUserId: string | null
+}
+
+function isWhoAmI(item: unknown): item is WhoAmI {
+  if (!item) return false
+  if (typeof item !== 'object') return false
+
+  const {
+    _id,
+    name,
+    salutation,
+    givenName,
+    familyName,
+    email,
+    position,
+    staff,
+    // image, // TODO: Check image as well
+    salesUserId,
+    serviceUserId,
+  } = item as WhoAmI
+
+  return (
+    typeof _id === 'string' &&
+    typeof name === 'string' &&
+    typeof salutation === 'string' &&
+    typeof givenName === 'string' &&
+    typeof familyName === 'string' &&
+    typeof email === 'string' &&
+    typeof position === 'string' &&
+    typeof staff === 'boolean' &&
+    (salesUserId === null || typeof salesUserId === 'string') &&
+    (serviceUserId === null || typeof serviceUserId === 'string')
+  )
 }
