@@ -1,3 +1,4 @@
+import { unstable_JrRestApi } from 'scrivito'
 import { isOptionalString } from './isOptionalString'
 
 export async function dataBinaryToUrl(
@@ -15,7 +16,18 @@ export async function dataBinaryToUrl(
     }
   }
 
-  throw new Error('Not yet implemented!')
+  const accessTokens = await unstable_JrRestApi.fetch(
+    `../pisa-api/binary-access-token/${binary._id}`,
+  )
+  if (!isAccessToken(accessTokens)) {
+    throw new Error(`Unexpected result: ${accessTokens}`)
+  }
+
+  // TODO: Use pisa url directly - no proxy!
+  return {
+    url: `${window.origin}/pisa-api${accessTokens.accessToken}`,
+    maxAge: accessTokens.maxAge,
+  }
 }
 
 export type DataBinary = UrlDataBinary | FullDataBinary
@@ -58,5 +70,21 @@ export function isFullDataBinary(item: unknown): item is FullDataBinary {
     typeof binary.filename === 'string' &&
     typeof binary.contentType === 'string' &&
     typeof binary.contentLength === 'number'
+  )
+}
+
+interface AccessToken {
+  accessToken: string
+  maxAge: number
+}
+
+function isAccessToken(item: unknown): item is AccessToken {
+  if (!item) return false
+  if (typeof item !== 'object') return false
+
+  const accessToken = item as AccessToken
+  return (
+    typeof accessToken.accessToken === 'string' &&
+    typeof accessToken.maxAge === 'number'
   )
 }
