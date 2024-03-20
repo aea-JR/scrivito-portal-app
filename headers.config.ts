@@ -25,7 +25,7 @@ function headers(environment: string) {
         'frame-ancestors':
           environment === 'development'
             ? ['*']
-            : ["'self'", 'https://*.scrivito.com'],
+            : ["'self'", 'https://*.scrivito.com', 'https://*.pages.dev'],
       },
     }),
     'X-Frame-Options': 'sameorigin',
