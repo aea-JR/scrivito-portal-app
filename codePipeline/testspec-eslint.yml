@@ -1,0 +1,19 @@
+# Do not change version. This is the version of aws buildspec, not the version of your buildspec file.
+version: 0.2
+
+env:
+  parameter-store:
+    CONTEXT: /${CODE_PIPELINE_NAME}/CONTEXT
+    SCRIVITO_TENANT: /${PROJECT_NAME}/SCRIVITO_TENANT
+    URL: /${CODE_PIPELINE_NAME}/URL
+
+phases:
+  install:
+    runtime-versions:
+      nodejs: 20
+  pre_build:
+    commands:
+      - npm ci
+  build:
+    commands:
+      - npm run lint
