@@ -9,6 +9,7 @@
   "type": "module",
   "scripts": {
     "build": "vite build",
+    "es-check": "npm run build && es-check es2018 --not=dist/assets/scrivito_extensions. './dist/**/*.js'",
     "types": "tsc",
     "preview": "vite preview",
     "lint": "eslint --max-warnings 0 'src/**/*.ts' 'src/**/*.tsx' && knip",
@@ -17,7 +18,8 @@
     "prerender-precompress": "precompress --include '(**).(css|html|js)' --types br dist-ssr",
     "prerender-preview": "ws",
     "prettier": "prettier --check .",
-    "start": "vite"
+    "start": "vite",
+    "uploadToS3AndDeployCf": "cd cloudFront/ && npm ci && npm run upload && npm run deploy"
   },
   "dependencies": {
     "highlight-words-core": "^1.2.3",
