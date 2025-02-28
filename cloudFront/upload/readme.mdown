@@ -1,0 +1,7 @@
+# CloudFront
+
+This is the reference implementation for using Scrivito on CloudFront.
+
+Please do not introduce scrivito.com specific improvements. If so, please talk first to `@apepper`.
+
+For a detailed description please read [CloudFront](https://docs.google.com/document/d/1fDQxdDQ_Og3DR56pWz3ktUCAcVUZD_Qzx-H-viHE5Dc/edit). Also for a detailed step-by-step guide please consult [support/scrivito-enterprise-aws-deployment.md](https://github.com/infopark/support/blob/documentation/scrivito/scrivito-enterprise-aws-deployment.md).

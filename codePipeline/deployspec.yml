@@ -1,0 +1,20 @@
+# Do not change version. This is the version of aws buildspec, not the version of your buildspec file.
+version: 0.2
+
+env:
+  parameter-store:
+    CLOUD_FRONT_DISTRIBUTION_ID: /${CODE_PIPELINE_NAME}/CLOUD_FRONT_DISTRIBUTION_ID
+    CONTEXT: /${CODE_PIPELINE_NAME}/CONTEXT
+    # use this value if you have alternative prerender path, default prerender path is "../buildPrerendered"
+    # BUILD_DIRECTORY: /${PROJECT_NAME}/BUILD_DIRECTORY
+    SCRIVITO_ORIGIN: /${CODE_PIPELINE_NAME}/SCRIVITO_ORIGIN
+    SCRIVITO_TENANT: /${PROJECT_NAME}/SCRIVITO_TENANT
+    URL: /${CODE_PIPELINE_NAME}/URL
+
+phases:
+  install:
+    runtime-versions:
+      nodejs: 20
+  build:
+    commands:
+      - npm run uploadToS3AndDeployCf
