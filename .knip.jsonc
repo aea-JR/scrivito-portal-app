@@ -15,6 +15,11 @@
     "public/scrivito/**",
     "src/assets/stylesheets/vendor/**",
     "vendor/**",
+    "cloudFront/deploy/**/*",
+    "cloudFront/spec/**/*",
+    "cloudFront/src/**/*",
+    "cloudFront/upload/**/*",
+    "cloudFront/utils/**/*",
   ],
   "ignoreBinaries": ["break"], // Lighthouse false positive
   "ignoreDependencies": [
