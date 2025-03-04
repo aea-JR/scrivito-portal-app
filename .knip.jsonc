@@ -21,7 +21,7 @@
     "cloudFront/upload/**/*",
     "cloudFront/utils/**/*",
   ],
-  "ignoreBinaries": ["break"], // Lighthouse false positive
+  "ignoreBinaries": ["break", "es-check"], // Lighthouse false positive
   "ignoreDependencies": [
     "@cloudflare/workers-types", // used by functions/*
 
