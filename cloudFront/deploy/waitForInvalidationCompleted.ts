@@ -1,14 +1,14 @@
-import { CloudFront } from "./aws";
-import { waitUntilInvalidationCompleted } from "@aws-sdk/client-cloudfront";
+import { CloudFront } from './aws'
+import { waitUntilInvalidationCompleted } from '@aws-sdk/client-cloudfront'
 
 export async function waitForInvalidationCompleted({
   cloudFrontDistributionId,
   invalidationId,
 }: {
-  cloudFrontDistributionId: string;
-  invalidationId: string;
+  cloudFrontDistributionId: string
+  invalidationId: string
 }): Promise<void> {
-  console.log("⏳ Waiting for Invalidation to finish... ⏳");
+  console.log('⏳ Waiting for Invalidation to finish... ⏳')
 
   await waitUntilInvalidationCompleted(
     {
@@ -21,7 +21,7 @@ export async function waitForInvalidationCompleted({
       DistributionId: cloudFrontDistributionId,
       Id: invalidationId,
     },
-  );
+  )
 
-  console.log("⌛ Invalidation finished! ⌛");
+  console.log('⌛ Invalidation finished! ⌛')
 }

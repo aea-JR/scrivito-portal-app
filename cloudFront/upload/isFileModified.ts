@@ -1,7 +1,7 @@
-import crypto from "crypto";
-import { FileUpload } from "./index";
-import { containsRemovalDate } from "./removalDate";
-import { HeadObject } from "./listHeadObjects";
+import crypto from 'crypto'
+import { FileUpload } from './index'
+import { containsRemovalDate } from './removalDate'
+import { HeadObject } from './listHeadObjects'
 
 export async function isFileModified(
   file: FileUpload,
@@ -14,10 +14,10 @@ export async function isFileModified(
     headObject.CacheControl !== file.cacheControl ||
     containsRemovalDate(headObject)
   ) {
-    return true;
+    return true
   }
-  const identical = await isETagIdentical(body, headObject.ETag);
-  return !identical;
+  const identical = await isETagIdentical(body, headObject.ETag)
+  return !identical
 }
 
 /**
@@ -33,10 +33,10 @@ async function isETagIdentical(
   body: Buffer | string,
   existingETag: string | undefined,
 ): Promise<boolean> {
-  const localETag = `"${md5(body)}"`;
-  return localETag === existingETag;
+  const localETag = `"${md5(body)}"`
+  return localETag === existingETag
 }
 
 function md5(data: Buffer | string): string {
-  return crypto.createHash("md5").update(data).digest("hex");
+  return crypto.createHash('md5').update(data).digest('hex')
 }

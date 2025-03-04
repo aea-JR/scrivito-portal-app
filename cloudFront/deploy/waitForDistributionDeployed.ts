@@ -1,14 +1,14 @@
 import {
   CloudFrontClient,
   waitUntilDistributionDeployed,
-} from "@aws-sdk/client-cloudfront";
+} from '@aws-sdk/client-cloudfront'
 
 /** Waits for "distributionDeployed" and prints out resulting status */
 export async function waitForDistributionDeployed(
   cloudFrontClient: CloudFrontClient,
   distributionId: string,
 ): Promise<void> {
-  console.log("⏳ Waiting for Deployment to finish... ⏳");
+  console.log('⏳ Waiting for Deployment to finish... ⏳')
 
   await waitUntilDistributionDeployed(
     {
@@ -20,6 +20,6 @@ export async function waitForDistributionDeployed(
     {
       Id: distributionId,
     },
-  );
-  console.log("⌛ Deployment succeeded! ⌛");
+  )
+  console.log('⌛ Deployment succeeded! ⌛')
 }

@@ -1,3 +1,3 @@
 export function isAssetKey(key: string): boolean {
-  return key.startsWith("assets/");
+  return key.startsWith('assets/')
 }
