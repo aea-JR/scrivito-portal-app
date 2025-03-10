@@ -15,5 +15,5 @@ phases:
     commands:
       - npm ci
   build:
-  commands:
-    - echo "Skipping es-check"
+    commands:
+      - npm run es-check
