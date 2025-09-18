@@ -26,18 +26,18 @@ export async function handler(
   if (isAmzRedirect(response.headers)) {
     const location =
       response.headers['x-amz-website-redirect-location'][0].value
-    return movedPermanentlyTo(location, readCloudFrontOnlyHeaders)
+    return movedPermanentlyTo(location, readCloudFrontOnlyHeaders, request.querystring)
   }
 
   if (isNotFoundStatusCode(response.status)) {
     const objId = recognizeObjId(request.uri)
     if (objId && `/${objId}` !== request.uri) {
       const path = `/${objId}`
-      return movedPermanentlyTo(path, readCloudFrontOnlyHeaders)
+      return movedPermanentlyTo(path, readCloudFrontOnlyHeaders, request.querystring)
     }
     if (request.uri !== '/' && request.uri.match(DANGLING_SLASHES)) {
       const normalizedPath = request.uri.replace(DANGLING_SLASHES, '')
-      return movedPermanentlyTo(normalizedPath, readCloudFrontOnlyHeaders)
+      return movedPermanentlyTo(normalizedPath, readCloudFrontOnlyHeaders, request.querystring)
     }
 
     return movedTo404(config.distributionDomainName, readCloudFrontOnlyHeaders)
@@ -82,8 +82,17 @@ function recognizeLocale(pathToRecognize: string): string | null {
 async function movedPermanentlyTo(
   urlOrPath: string,
   readCloudFrontOnlyHeaders: AWSLambda.CloudFrontHeaders,
+  originalQuery?: string,
 ): Promise<AWSLambda.CloudFrontResultResponse> {
-  console.log(`Permanently redirecting to ${urlOrPath} (Status-Code: 301)`)
+  // Preserve original query string on redirects
+  const hasQueryToAppend = Boolean(originalQuery && originalQuery.length > 0)
+  const location = hasQueryToAppend
+    ? urlOrPath.includes('?')
+      ? `${urlOrPath}&${originalQuery}`
+      : `${urlOrPath}?${originalQuery}`
+    : urlOrPath
+
+  console.log(`Permanently redirecting to ${location} (Status-Code: 301)`)
 
   return {
     status: '301',
@@ -96,7 +105,7 @@ async function movedPermanentlyTo(
           value: 'public, max-age=0, s-maxage=60, must-revalidate',
         },
       ],
-      location: [{ key: 'Location', value: urlOrPath }],
+      location: [{ key: 'Location', value: location }],
     },
     body: '',
     bodyEncoding: 'text',
