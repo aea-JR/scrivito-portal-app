@@ -1,7 +1,7 @@
 import { connect, isCurrentPage, LinkTag, Obj } from 'scrivito'
 import { TopNavigationWidgetInstance } from '../TopNavigationWidgetClass'
 import { NavItem } from './NavItem'
-import Nav from 'react-bootstrap/Nav'
+import { Nav } from 'react-bootstrap'
 import { ObjIconAndTitle } from '../../../Components/ObjIconAndTitle'
 import { containsItems, numberOfCartItems } from '../../../Data/CartItem/Cart'
 import { HomepageInstance } from '../../../Objs/Homepage/HomepageObjClass'
@@ -33,7 +33,7 @@ export const MetaNavigation = connect(function MetaNavigation({
       </Nav>
 
       <Nav className="ms-auto border-left">
-        <LanguageSwitch />
+        <LanguageSwitch align="start" />
         {showCart && (
           <Nav.Item>
             <Nav.Link

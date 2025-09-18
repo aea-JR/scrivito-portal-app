@@ -1,56 +1,55 @@
-import { StrictMode } from 'react'
-import { createRoot, hydrateRoot } from 'react-dom/client'
-import { isEditorLoggedIn, preload, updateContent } from 'scrivito'
+import { isEditorLoggedIn } from 'scrivito'
 
 import './Data'
 import './Objs'
 import './Widgets'
-import { App } from './App'
 import { configure } from './config'
-import { ensureSiteIsPresent } from './config/scrivitoSites'
+import { verifySameWhoAmIUser } from './Data/CurrentUser/verifySameWhoAmIUser'
+import { renderOrHydrateApp } from './renderOrHydrateApp'
+import { getJrPlatformInstanceId } from './privateJrPlatform/multiTenancy'
+import { createRoot } from 'react-dom/client'
+import { StrictMode } from 'react'
+import { JrPlatformMissingTenant } from './privateJrPlatform/Components/JrPlatformMissingTenant'
+import { isJrPlatformValidContentFormat } from './privateJrPlatform/isJrPlatformValidContentFormat'
+import { JrPlatformWrongContentFormat } from './privateJrPlatform/Components/JrPlatformWrongContentFormat'
+import { ensureSiteIsPresent } from './multiSite/ensureSiteIsPresent'
 
-configure()
-ensureSiteIsPresent()
+boot()
 
-declare global {
-  interface Window {
-    preloadDump?: unknown
+async function boot() {
+  const rootElement = document.getElementById('root')
+  if (!rootElement) throw new Error("Root element with id 'root' not found")
+
+  if (import.meta.env.PRIVATE_JR_PLATFORM) {
+    if (!getJrPlatformInstanceId()) {
+      return createRoot(rootElement).render(
+        <StrictMode>
+          <JrPlatformMissingTenant />
+        </StrictMode>,
+      )
+    }
   }
-}
 
-if (typeof window.preloadDump === 'string') {
-  preload(window.preloadDump).then(({ dumpLoaded }) => {
-    delete window.preloadDump
+  configure()
 
-    if (dumpLoaded) hydrateApp()
-    else renderApp()
-  })
-} else renderApp()
+  if (import.meta.env.PRIVATE_JR_PLATFORM) {
+    if (!(await isJrPlatformValidContentFormat())) {
+      return createRoot(rootElement).render(
+        <StrictMode>
+          <JrPlatformWrongContentFormat />
+        </StrictMode>,
+      )
+    }
+  }
+  ensureSiteIsPresent()
+  verifySameWhoAmIUser()
 
-function renderApp() {
-  createRoot(document.getElementById('root') as HTMLElement).render(
-    <StrictMode>
-      <App />
-    </StrictMode>,
-  )
-}
+  renderOrHydrateApp(rootElement)
 
-function hydrateApp() {
-  hydrateRoot(
-    document.getElementById('root') as HTMLElement,
-    <StrictMode>
-      <App
-        appWrapperRef={(el) => {
-          if (el) updateContent()
-        }}
-      />
-    </StrictMode>,
-  )
-}
-
-if (isEditorLoggedIn()) {
-  import('./assets/stylesheets/scrivitoEditing.scss')
-  import('./Data/editingConfigs')
-  import('./Objs/editingConfigs')
-  import('./Widgets/editingConfigs')
+  if (isEditorLoggedIn()) {
+    import('./assets/stylesheets/scrivitoEditing.scss')
+    import('./Data/editingConfigs')
+    import('./Objs/editingConfigs')
+    import('./Widgets/editingConfigs')
+  }
 }

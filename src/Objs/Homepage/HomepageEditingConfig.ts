@@ -8,6 +8,11 @@ import {
   defaultPagePropertiesGroups,
   defaultPageValidations,
 } from '../defaultPageEditingConfig'
+import { SiteBorderRadiusEditor } from '../../Components/ScrivitoExtensions/SiteBorderRadiusEditor'
+import { TopNavigationWidget } from '../../Widgets/TopNavigationWidget/TopNavigationWidgetClass'
+import { SectionWidget } from '../../Widgets/SectionWidget/SectionWidgetClass'
+import { HeadlineWidget } from '../../Widgets/HeadlineWidget/HeadlineWidgetClass'
+import { TextWidget } from '../../Widgets/TextWidget/TextWidgetClass'
 
 provideEditingConfig(Homepage, {
   title: 'Homepage',
@@ -21,8 +26,9 @@ provideEditingConfig(Homepage, {
       description:
         'Under which URL is this site reachable? E.g. "https://www.tynacoon.com/en"',
     },
-    pisaUrl: {
-      title: 'PisaSales Portal API URL',
+    jwtPisaSalesApiUrl: {
+      title: 'JWT PisaSales API URL',
+      description: 'Without trailing slash or "portal" path.',
     },
     siteFacebookAppId: { title: 'Facebook app ID' },
     siteLanguageIcon: { title: 'Language icon' },
@@ -40,7 +46,8 @@ provideEditingConfig(Homepage, {
     },
     siteRoundedCorners: {
       title: 'Show rounded corners?',
-      description: 'Default: Yes',
+      description:
+        'Deprecated in favour of “Site rounded corners”. Default: Yes',
     },
     siteSearchResultsPage: {
       title: 'Location of search results page',
@@ -71,14 +78,22 @@ provideEditingConfig(Homepage, {
       description:
         'If your chosen font supports multiple weights, pick the one that best fits your design. Default: 500',
     },
+    siteSinglePage: {
+      title: 'Single page site',
+      description:
+        'If activated, only the selected page will be accessible, even for logged-in users. All other pages will display a 404 not found page.',
+    },
   },
   propertiesGroups: (site) => [
+    ...defaultPagePropertiesGroups,
     {
       title: 'Site settings',
       properties: [
         'contentTitle',
         'baseUrl',
-        site.id() === import.meta.env.SCRIVITO_ROOT_OBJ_ID ? 'pisaUrl' : null,
+        site.id() === import.meta.env.SCRIVITO_ROOT_OBJ_ID
+          ? 'jwtPisaSalesApiUrl'
+          : null,
         'siteLogoDark',
         'siteFavicon',
         'siteLanguageIcon',
@@ -86,20 +101,28 @@ provideEditingConfig(Homepage, {
         'siteSearchResultsPage',
         'siteUserProfilePage',
         'siteDropShadow',
-        'siteRoundedCorners',
+        site.get('siteBorderRadius') ? null : 'siteRoundedCorners',
         'siteFacebookAppId',
         'siteTwitterSite',
+        'siteSinglePage',
       ].filter((p): p is string => typeof p === 'string'),
       key: 'site-settings-group',
     },
     {
-      title: 'Site colors',
+      title: 'Colors',
       component: SiteColorsPicker,
-      properties: ['siteColorPrimary', 'siteColorSecondary'],
+      properties: [
+        'siteColorPrimary',
+        'siteColorSecondary',
+        'siteColorTextDark',
+        'siteColorTextDarkHeadline',
+        'siteColorTextLight',
+        'siteColorTextLightHeadline',
+      ],
       key: 'site-colors-group',
     },
     {
-      title: 'Site fonts',
+      title: 'Fonts',
       properties: [
         'siteFontHeadline',
         'siteFontBody',
@@ -108,15 +131,53 @@ provideEditingConfig(Homepage, {
       ],
       key: 'site-fonts-group',
     },
-    ...defaultPagePropertiesGroups,
+    {
+      title: 'Rounded corners',
+      component: SiteBorderRadiusEditor,
+      properties: ['siteBorderRadius'],
+      key: 'site-rounded-corners-group',
+    },
   ],
   properties: [...defaultPageProperties],
   initialContent: {
     ...defaultPageInitialContent,
+    body: [
+      new SectionWidget({
+        backgroundColor: 'primary',
+        content: [new HeadlineWidget(), new TextWidget()],
+      }),
+    ],
+    contentFormat: 'portal-app:6',
+    layoutHeader: [new TopNavigationWidget()],
+    layoutShowHeader: true,
+    siteBorderRadius: '8.5px',
     siteDropShadow: true,
     siteFontBodyWeight: '500',
     siteFontHeadlineWeight: '500',
-    siteRoundedCorners: true,
   },
-  validations: defaultPageValidations,
+  validations: [
+    ...defaultPageValidations,
+    [
+      '_language',
+      (language: string | null, { obj }) => {
+        if (!language) {
+          return {
+            message: 'The language must be set.',
+            severity: 'error',
+          }
+        }
+
+        const duplicates = obj
+          .versionsOnAllSites()
+          .filter((version) => version.language() === language).length
+
+        if (duplicates > 1) {
+          return {
+            message: `Multiple homepages exist for language “${language}”. Only one is allowed. Please pick a different language.`,
+            severity: 'error',
+          }
+        }
+      },
+    ],
+  ],
 })

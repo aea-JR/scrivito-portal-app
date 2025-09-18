@@ -1,39 +1,48 @@
 import {
+  DataAttributeDefinitions,
   DataConnectionError,
   DataConnectionResultItem,
   load,
   provideDataClass,
 } from 'scrivito'
 import { CurrentUser } from '../CurrentUser/CurrentUserDataItem'
-import { fetchAttributes } from '../fetchAttributes'
-import { fetchTitle } from '../fetchTitle'
 import { pisaClient } from '../pisaClient'
+import { fetchSchema } from '../fetchSchema'
 
-export const User = provideDataClass(
-  'User',
-  (async () => {
-    const apiClient = await pisaClient('user')
-    if (!apiClient) {
-      return (await import('./userParamsFallback')).userParamsFallback()
-    }
+let pisaSchemaPromise: Promise<{
+  attributes: DataAttributeDefinitions
+  title?: string
+}>
 
-    return {
-      attributes: () => fetchAttributes('user'),
-      title: () => fetchTitle('user'),
-      connection: {
-        index: async () => {
-          throw new DataConnectionError(
-            'Listing users is not supported due to data protection reasons.',
-          )
-        },
-        get: async (id) => {
-          const item = await apiClient.get(id)
-          return item ? postProcessUserData(item as { _id: string }) : item
-        },
+async function pisaSchema() {
+  pisaSchemaPromise ??= fetchSchema('portal/user')
+  return pisaSchemaPromise
+}
+
+export const User = provideDataClass('User', async () => {
+  const apiClient = await pisaClient('portal/user')
+  if (!apiClient) {
+    return (await import('./userParamsFallback')).userParamsFallback()
+  }
+
+  return {
+    // attributes and title are defined as functions to trigger potential
+    // IAM login redirects only, when the information is actually needed.
+    attributes: async () => (await pisaSchema()).attributes,
+    title: async () => (await pisaSchema()).title,
+    connection: {
+      index: async () => {
+        throw new DataConnectionError(
+          'Listing users is not supported due to data protection reasons.',
+        )
       },
-    }
-  })(),
-)
+      get: async (id) => {
+        const item = await apiClient.get(id)
+        return item ? postProcessUserData(item as { _id: string }) : item
+      },
+    },
+  }
+})
 
 export async function postProcessUserData(
   data: DataConnectionResultItem,

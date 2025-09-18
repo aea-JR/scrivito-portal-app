@@ -1,14 +1,18 @@
-import { provideDataClass } from 'scrivito'
+import { isUserLoggedIn, provideDataClass } from 'scrivito'
 import { pisaConfig } from '../pisaClient'
+import { jwtPisaSalesApiConfig } from '../jwtPisaSalesApiConfig'
 
-export const Gdpr = provideDataClass(
-  'Gdpr',
-  (async () => {
-    const restApi = await pisaConfig('gdpr')
-    if (!restApi) {
-      return (await import('./gdprParamsFallback')).gdprParamsFallback()
-    }
+export const Gdpr = provideDataClass('Gdpr', async () => {
+  if (!isUserLoggedIn()) {
+    const jwtRestApi = await jwtPisaSalesApiConfig({ subPath: 'portal/gdpr' })
 
-    return { restApi }
-  })(),
-)
+    if (jwtRestApi) return { restApi: jwtRestApi }
+  }
+
+  const restApi = await pisaConfig('portal/gdpr')
+  if (!restApi) {
+    return (await import('./gdprParamsFallback')).gdprParamsFallback()
+  }
+
+  return { restApi }
+})

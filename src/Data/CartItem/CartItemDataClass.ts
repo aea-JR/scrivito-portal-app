@@ -7,7 +7,7 @@ import {
 import { localStorageDataConnection } from '../localStorageDataConnection'
 
 async function attributes(): Promise<DataAttributeDefinitions> {
-  const lang = await load(currentLanguage)
+  const lang = await load(() => currentLanguage())
 
   return {
     product: [
@@ -17,12 +17,15 @@ async function attributes(): Promise<DataAttributeDefinitions> {
         to: 'Product',
       },
     ],
+    quantity: ['number', { title: lang === 'de' ? 'Menge' : 'Quantity' }],
   }
 }
 
-export const CartItem = provideDataClass('CartItem', {
+export const CartItem = provideDataClass('CartItem', () => ({
   attributes,
   title: async () =>
-    (await load(currentLanguage)) === 'de' ? 'Warenkorb-Element' : 'Cart item',
-  connection: localStorageDataConnection('CartItem'),
-})
+    (await load(() => currentLanguage())) === 'de'
+      ? 'Warenkorb-Element'
+      : 'Cart item',
+  connection: localStorageDataConnection('CartItem-v2'),
+}))

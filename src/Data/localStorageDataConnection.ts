@@ -1,8 +1,11 @@
-import { DataConnection, DataConnectionResultItem } from 'scrivito'
+import {
+  DataConnection,
+  DataConnectionResultItem,
+  getInstanceId,
+} from 'scrivito'
 import { pseudoRandom32CharHex } from '../utils/pseudoRandom32CharHex'
 import { orderBy } from 'lodash-es'
 import { ensureString } from '../utils/ensureString'
-import { scrivitoTenantId } from '../config/scrivitoTenants'
 
 interface RawDataItem {
   _id: string
@@ -24,7 +27,15 @@ export function localStorageDataConnection(
       data: DataConnectionResultItem,
     ) => Promise<DataConnectionResultItem>
   } = {},
-): DataConnection {
+): Partial<DataConnection> {
+  if (typeof localStorage === 'undefined') {
+    return {
+      index: () => {
+        throw new Error('localStorage is not available!')
+      },
+    }
+  }
+
   const recordKey = recordKeyForClassName(className)
 
   if (initialContent) initializeContent(initialContent)
@@ -95,8 +106,9 @@ export function localStorageDataConnection(
 
     async update(id, data) {
       const record = restoreRecord(recordKey)
+      const oldData = restoreRecord(recordKey)[id]
       const newData = prepareData ? await prepareData(data) : data
-      const storedData: RawDataItem = { ...newData, _id: id }
+      const storedData: RawDataItem = { ...oldData, ...newData, _id: id }
       record[id] = storedData
 
       persistRecord(recordKey, record)
@@ -111,7 +123,7 @@ export function localStorageDataConnection(
     },
   }
 
-  async function initializeContent(initialContent: RawDataItem[]) {
+  function initializeContent(initialContent: RawDataItem[]) {
     if (typeof localStorage === 'undefined') return
 
     const initializedKey = `${recordKey}-initialized-with`
@@ -147,17 +159,20 @@ export function searchLocalStorageDataConnections(
     typeof value === 'string' &&
     value.toLowerCase().includes(lowerCaseSearchTerm)
 
-  return classNames.flatMap((className) =>
-    Object.entries(restoreRecord(recordKeyForClassName(className)))
+  const results = classNames.map((className) => {
+    const recordKey = recordKeyForClassName(className)
+    return Object.entries(restoreRecord(recordKey))
       .filter(([_id, rawItem]) =>
         Object.values(rawItem).some(matchesSearchTerm),
       )
-      .map(([_id, rawItem]) => ({ _id, className, rawItem })),
-  )
+      .map(([_id, rawItem]) => ({ _id, className, rawItem }))
+  })
+
+  return results.flat()
 }
 
 function recordKeyForClassName(className: string): string {
-  return `localDataClass-${scrivitoTenantId()}-${className}`
+  return `localDataClass-${getInstanceId()}-${className}`
 }
 
 function restoreRecord(recordKey: string): Record<string, RawDataItem> {

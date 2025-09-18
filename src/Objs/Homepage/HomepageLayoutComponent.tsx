@@ -1,4 +1,31 @@
+import { CurrentPage, currentPage, Obj, provideLayoutComponent } from 'scrivito'
 import { Homepage } from './HomepageObjClass'
-import { provideDefaultPageLayoutComponent } from '../defaultPageLayoutComponent'
+import { DefaultPageLayoutComponent } from '../defaultPageLayoutComponent'
+import { Loading } from '../../Components/Loading'
 
-provideDefaultPageLayoutComponent(Homepage)
+provideLayoutComponent(
+  Homepage,
+  ({ page }) =>
+    ignoreTopLevelLayout() ? (
+      <CurrentPage />
+    ) : (
+      <DefaultPageLayoutComponent page={page} />
+    ),
+  { loading: Loading },
+)
+
+function ignoreTopLevelLayout(): boolean {
+  return getHomepageSubpage()?.get('layoutIgnoreTopLevelLayout') === true
+}
+
+function getHomepageSubpage(): Obj | null {
+  const homepageSubpagePath = currentPage()
+    ?.path()
+    ?.split('/')
+    .slice(0, 2)
+    .join('/')
+  if (!homepageSubpagePath) return null
+  if (homepageSubpagePath === '/') return null
+
+  return Obj.getByPath(homepageSubpagePath)
+}

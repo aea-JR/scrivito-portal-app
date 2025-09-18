@@ -1,4 +1,4 @@
-import { provideEditingConfig } from 'scrivito'
+import { Obj, provideEditingConfig } from 'scrivito'
 import { Page } from './PageObjClass'
 import {
   defaultPageEditingConfigAttributes,
@@ -8,6 +8,24 @@ import {
   defaultPageValidations,
 } from '../defaultPageEditingConfig'
 import Thumbnail from './thumbnail.svg'
+import { SectionWidget } from '../../Widgets/SectionWidget/SectionWidgetClass'
+
+function propertiesGroups(page: Obj) {
+  if (page.path()?.split('/').length === 2) {
+    // Only show layoutIgnoreTopLevelLayout for top-level pages
+    return defaultPagePropertiesGroups.map((group) =>
+      group.key === 'layout-group'
+        ? {
+            key: group.key,
+            title: group.title,
+            properties: [...group.properties, 'layoutIgnoreTopLevelLayout'],
+          }
+        : group,
+    )
+  }
+
+  return defaultPagePropertiesGroups
+}
 
 provideEditingConfig(Page, {
   title: 'Page',
@@ -23,10 +41,9 @@ provideEditingConfig(Page, {
       title: 'Hide in navigation?',
       description: 'Default: No',
     },
-    showAsLandingPage: {
-      title: 'Display this page as a landing page?',
-      description:
-        'Removes the header navigation and only centers the logo instead. Default: No',
+    layoutIgnoreTopLevelLayout: {
+      title: 'Ignore top-level layout?',
+      description: 'Default: No',
     },
     data: {
       restrictDataTo: ['scope', 'item'],
@@ -36,9 +53,8 @@ provideEditingConfig(Page, {
     ...defaultPageProperties,
     'hideInNavigation',
     'excludeFromSearch',
-    'showAsLandingPage',
   ],
-  propertiesGroups: defaultPagePropertiesGroups,
-  initialContent: defaultPageInitialContent,
+  propertiesGroups,
+  initialContent: { ...defaultPageInitialContent, body: [new SectionWidget()] },
   validations: defaultPageValidations,
 })

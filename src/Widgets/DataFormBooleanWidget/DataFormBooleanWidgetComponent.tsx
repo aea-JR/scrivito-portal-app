@@ -10,7 +10,12 @@ import './DataFormBooleanWidget.scss'
 
 provideComponent(DataFormBooleanWidget, ({ widget }) => {
   const attributeName = useData().attributeName()
-  const id = ['DataFormBooleanWidget', widget.id(), attributeName].join('-')
+  const id = [
+    'DataFormBooleanWidget',
+    widget.id(),
+    useData().dataItem()?.id(),
+    attributeName,
+  ].join('-')
 
   const value = useData().dataItemAttribute()?.get()
   const defaultChecked =
@@ -31,7 +36,7 @@ provideComponent(DataFormBooleanWidget, ({ widget }) => {
       />{' '}
       <ContentTag
         content={widget}
-        attribute="label"
+        attribute={value ? 'onLabel' : 'offLabel'}
         tag="label"
         className="form-label form-check-label"
         htmlFor={id}
