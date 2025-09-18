@@ -23,7 +23,7 @@ export async function jwtPisaSalesApiConfig({
   }
 }
 
-async function jwtPisaSalesApiUrl(): Promise<string | null> {
+export async function jwtPisaSalesApiUrl(): Promise<string | null> {
   if (import.meta.env.FORCE_LOCAL_STORAGE) return null
 
   const defaultRoot = await load(() =>

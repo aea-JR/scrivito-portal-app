@@ -1,11 +1,12 @@
 import { initNeoletterFormWidgets } from 'scrivito-neoletter-form-widgets'
-import { initPisaQuestionnaireWidgets } from 'psa-scr-qst-tst'
+import { initPisaSalesQuestionnaireWidgets } from 'psa-scr-qst-tst'
+import { questionnaireBackendConnection } from '../Data/pisaClient'
 import.meta.glob(['./**/*WidgetClass.ts', './**/*WidgetComponent.tsx'], {
   eager: true,
 })
 
-initPisaQuestionnaireWidgets({
-  pisaUrl: 'https://web130.crm.pisasales.de/api-salesportal',
+initPisaSalesQuestionnaireWidgets({
+  connection: questionnaireBackendConnection()
 })
 initNeoletterFormWidgets()
-export {}
+export { }
