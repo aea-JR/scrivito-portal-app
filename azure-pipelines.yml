@@ -1,0 +1,70 @@
+# Azure Pipeline to trigger AWS hannre-website Staging
+name: hannre-website-$(Date:yyyyMMdd)$(Rev:.r)
+
+trigger:
+- main
+
+pool:
+  vmImage: ubuntu-latest
+
+steps:
+# Install AWS CLI from official source
+
+# - script: |
+#     sudo add-apt-repository "deb http://packages.amazon.com/ubuntu/ buster main"
+#     sudo apt-get update
+#     sudo apt-get install -y awscli
+#   displayName: 'Install AWS CLI'
+
+- script:
+    sudo apt-get update
+    sudo apt install -y unzip curl
+    curl "https://awscli.amazonaws.com/awscli-exe-linux-aarch64.zip" -o "awscliv2.zip"
+    unzip awscliv2.zip
+    sudo ./aws/install --bin-dir /usr/local/bin --install-dir /usr/local/aws-cli --update
+    aws --version
+    rm -rf awscliv2.zip aws
+  displayName: 'Install AWS CLI'
+
+# Trigger AWS hannre-website staging build pipeline
+- task: AWSCLI@1
+  inputs:
+    awsCredentials: 'hannre-website-azure-devops-pipeline'   # Name of your Azure AWS Service Connection
+    regionName: 'eu-central-1'
+    command: 'codepipeline'
+    subCommand: 'start-pipeline-execution'
+    arguments: '--name hannre-website-develop'
+  displayName: 'Trigger hannre-website-develop Pipeline'
+
+# Trigger AWS hannre-website staging deploy pipeline
+- task: AWSCLI@1
+  inputs:
+    awsCredentials: 'hannre-website-azure-devops-pipeline'
+    regionName: 'eu-central-1'
+    command: 'codepipeline'
+    subCommand: 'start-pipeline-execution'
+    arguments: '--name hannre-website-staging'
+  displayName: 'Trigger hannre-website-develop Pipeline'
+
+# Optionally, trigger AWS hannre-website staging test pipelines
+- task: AWSCLI@1
+  inputs:
+    awsCredentials: 'hannre-website-azure-devops-pipeline'
+    regionName: 'eu-central-1'
+    command: 'codepipeline'
+    subCommand: 'start-pipeline-execution'
+    arguments: '--name hannre-website-production'
+  displayName: 'Trigger hannre-website-develop Pipeline'
+
+# Add error notification if any tasks failed
+- script: |
+    if ${{ variables['FailedTasksCount'] }} -gt 0; then
+      echo "## Pipeline Failed! ##"
+      echo "One or more tasks in the pipeline failed. Check the logs for details."
+      # Implement sending an email/slack notification here
+    else
+      echo "## Pipeline Succeeded! ##"
+      echo "All tasks completed successfully!"
+    fi
+  displayName: 'Notification'
+  condition: always()
