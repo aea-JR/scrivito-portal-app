@@ -1,4 +1,4 @@
-import { loadEditingConfigs } from 'scrivito-neoletter-form-widgets/editing'
+import { loadEditingConfigs } from 'my-test-form-widgets/editing'
 import { loadQuestionnaireEditingConfigs } from 'psa-scr-qst-tst/editing'
 
 import.meta.glob(['./**/*EditingConfig.ts', './**/*EditingConfig.tsx'], {
@@ -7,4 +7,4 @@ import.meta.glob(['./**/*EditingConfig.ts', './**/*EditingConfig.tsx'], {
 loadQuestionnaireEditingConfigs()
 loadEditingConfigs()
 
-export {}
+export { }

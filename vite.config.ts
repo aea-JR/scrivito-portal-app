@@ -40,10 +40,10 @@ export default defineConfig(({ mode }) => {
         plugins: [
           HONEYBADGER_API_KEY
             ? honeybadgerRollupPlugin({
-                apiKey: HONEYBADGER_API_KEY,
-                assetsUrl: 'https://*',
-                revision: HONEYBADGER_REVISION,
-              })
+              apiKey: HONEYBADGER_API_KEY,
+              assetsUrl: 'https://*',
+              revision: HONEYBADGER_REVISION,
+            })
             : {},
         ],
         output: {
@@ -54,7 +54,7 @@ export default defineConfig(({ mode }) => {
               'react-helmet-async',
               'react-toastify',
             ],
-            scrivito: ['scrivito-neoletter-form-widgets'],
+            scrivito: ['my-test-form-widgets'],
           },
         },
       },
@@ -113,8 +113,8 @@ function ensureScrivitoTenantIsPresent(env: Record<string, string>): void {
 
   throw new Error(
     'Environment variable "SCRIVITO_TENANT" is not defined!' +
-      ' Check if the ".env" or `.env.local` file is set with a proper SCRIVITO_TENANT.' +
-      ' See ".env.example" for an example.',
+    ' Check if the ".env" or `.env.local` file is set with a proper SCRIVITO_TENANT.' +
+    ' See ".env.example" for an example.',
   )
 }
 
