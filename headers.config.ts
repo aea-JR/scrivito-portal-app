@@ -11,8 +11,8 @@ function headers(environment: string) {
           "'self'",
           'https://api.scrivito.com',
           'https://assets.scrivito.com',
-          'https://www.google.com/recaptcha/',
-          'https://www.gstatic.com/recaptcha/'
+          // 'https://www.google.com/recaptcha/',
+          // 'https://www.gstatic.com/recaptcha/'
         ].concat(
           // The package `@vitejs/plugin-react-swc` include an inline script into index.html (see [1]).
           // [1] https://github.com/vitejs/vite-plugin-react/blob/7517103485081b26004e79f169efdd2d12a60946/packages/common/refresh-utils.ts#L7-L12
