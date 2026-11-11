@@ -8,5 +8,5 @@ import.meta.glob(['./**/*WidgetClass.ts', './**/*WidgetComponent.tsx'], {
 initPisaSalesQuestionnaireWidgets({
   connection: questionnaireBackendConnection()
 })
-initNeoletterFormWidgets()
+initNeoletterFormWidgets({ captchaOptions: { captchaType: "google-recaptcha-v2", siteKey: "6LfpIoYpAAAAANQU2bGh4gANjg-p5JxF11unJ3cd" } })
 export { }
